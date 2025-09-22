@@ -4,24 +4,27 @@ import streamlit as st
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
+# Carregar dados
 df = pd.read_csv("pizzas.csv")
+sabores = pd.read_csv("sabores.csv")
 
+# Treinar modelo (só diâmetro x preço_base)
+X = df[["diametro"]]
+y = df["preco"]
 modelo = LinearRegression()
-x = df[["diametro"]]
-y = df[["preco"]]
-
-modelo.fit(x,y)
+modelo.fit(X, y)
 
 # Interface
-st.title("🍕 Prevendo o preço da pizza")
+st.title("🍕 Calculando o preço da pizza")
 st.divider()
 
-
-# Entrada do usuário
 diametro = st.number_input("Digite o diâmetro da pizza (cm):", min_value=1, max_value=600, value=30)
+sabor = st.selectbox("Escolha o sabor:", sabores["sabor"].tolist())
 
-# Fazer previsão
-previsao = modelo.predict([[diametro]])[0][0]
+# Previsão
+preco_base = modelo.predict([[diametro]])[0]
+adicional = sabores.loc[sabores["sabor"] == sabor, "adicional"].values[0]
+preco_final = preco_base + adicional
 
-st.subheader("🔮 Previsão")
-st.write(f"O preço estimado para uma pizza de **{diametro} cm** é **R$ {previsao:.2f}**")
+st.subheader("💰 Previsão de preço")
+st.write(f"O preço estimado para uma pizza de **{diametro} cm** sabor **{sabor}** é **R$ {preco_final:.2f}**")
